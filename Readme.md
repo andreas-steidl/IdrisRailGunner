@@ -5,6 +5,9 @@ Its for Joystick only at the moment!
 
 ---
 
+You find a first Release here: https://github.com/andreas-steidl/IdrisRailGunner/releases/tag/v.0.1.0
+
+---
 ## Step 1: Install Python
 
 1. Visit https://www.python.org/downloads/windows/
