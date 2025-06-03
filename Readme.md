@@ -9,7 +9,7 @@ You find a first Release here: https://github.com/andreas-steidl/IdrisRailGunner
 
 ---
 
-# Manual instalation with Python
+# Manual installation with Python
 
 ## Step 1: Install Python
 
