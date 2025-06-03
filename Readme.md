@@ -1,6 +1,5 @@
-#############################################
+
 # Railgun Timer – Installation Guide (EN)    #
-#############################################
 
 Its for Joystick only at the moment!
 
