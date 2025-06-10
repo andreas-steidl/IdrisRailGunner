@@ -4,11 +4,18 @@ import time
 import threading
 import pygame
 import os
+from pynput import mouse as not_a_cat
 from dotenv import load_dotenv
 
 
 class RailgunTimerApp:
     def __init__(self, master: tk.Tk):
+        self.not_a_cat_listener = not_a_cat.Listener(on_click=self.on_mouse_click)
+        self.not_a_cat_listener.start()
+
+        # to mitigate not_a_cat troubles, put in a deactivation state
+        self.tool_active = tk.BooleanVar(value=True)
+
         self.master = master
         self.master.overrideredirect(True)
         self.master.attributes('-topmost', True)
@@ -22,6 +29,13 @@ class RailgunTimerApp:
 
         self.close_button = tk.Button(master, text="X", command=self.master.destroy, bd=0, bg='black', fg='gray', padx=5, pady=2)
         self.close_button.place(relx=1.0, rely=0.0, anchor='ne')
+
+        self.active_checkbox = tk.Checkbutton(
+            master, text="", variable=self.tool_active,
+            onvalue=True, offvalue=False, bg='black', fg='gray',
+            selectcolor='black', activebackground='black', activeforeground='white'
+        )
+        self.active_checkbox.place(relx=0.75, rely=0.0)
 
         self.style = ttk.Style(master)
         self.style.theme_use('default')
@@ -83,12 +97,12 @@ class RailgunTimerApp:
             else:
                 self.charge_progress['value'] = charge_percent
                 self.charge_label.config(text=f"Charge: {charge_percent}%")
-                self.start_cooldown()
+                threading.Thread(target=self.start_cooldown, daemon=True).start()
 
     def overcharge(self):
         self.charge_progress['value'] = 0
         self.charge_label.config(text="OVERCHARGE!")
-        self.start_cooldown()
+        threading.Thread(target=self.start_cooldown, daemon=True).start()
 
     def update_charge_progress(self):
         blink_state = True
@@ -147,6 +161,8 @@ class RailgunTimerApp:
         self.style.configure("Charge.Horizontal.TProgressbar", background='green')
 
     def joystick_listener(self):
+        if not self.tool_active.get():
+            return
         holding = False
         while True:
             pygame.event.pump()
@@ -159,6 +175,26 @@ class RailgunTimerApp:
                     self.stop_charge()
                     holding = False
             time.sleep(0.1)
+
+    def on_mouse_click(self, x, y, button, pressed):
+        if not self.tool_active.get():
+            return
+        if button == not_a_cat.Button.left:
+            # Prüfen ob Maus ausserhalb Fenster
+            win_x = self.master.winfo_rootx()
+            win_y = self.master.winfo_rooty()
+            win_width = self.master.winfo_width()
+            win_height = self.master.winfo_height()
+
+            is_inside = win_x <= x <= win_x + win_width and win_y <= y <= win_y + win_height
+
+            if not is_inside:
+                if pressed:
+                    if not self.charging and not self.cooling_down:
+                        self.start_charge()
+                else:
+                    if self.charging:
+                        self.stop_charge()
 
 
 if __name__ == "__main__":
