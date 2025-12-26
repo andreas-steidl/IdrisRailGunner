@@ -1,3 +1,4 @@
+#  ARCHIVED due to SC 4.5, no longer needed #
 
 # Railgun Timer – Installation Guide (EN)    #
 
